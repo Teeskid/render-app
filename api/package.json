@@ -10,7 +10,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "PORT=8888 ts-node src/index.ts",
     "watch": "npx tsc --watch",
     "build": "npx tsc"
   },
