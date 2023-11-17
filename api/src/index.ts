@@ -54,8 +54,6 @@ app.all('/webhook', (req: Request<{}, string, UssdRequest>, res: Response<string
 			// This is a terminal request. Note how we start the response with END
 			response = `END Your account number is ${accountNumber}`;
 		}
-
-		console.log(sessionId, serviceCode)
 	} catch (error: Error | unknown) {
 		response = `END ${(error as Error).message}`
 	}
