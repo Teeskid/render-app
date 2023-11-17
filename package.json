@@ -1,0 +1,12 @@
+{
+  "name": "render-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:Teeskid/render-app.git",
+  "author": "Teeskid",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "push": "git add . && git commit -m 'quick-push' && git push origin main"
+  }
+}
