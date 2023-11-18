@@ -1,8 +1,9 @@
+import { PubSub } from "@google-cloud/pubsub"
 import parser from "body-parser"
 import dotenv from "dotenv"
 import express, { Request, Response } from "express"
 import { pid } from "process"
-import { UssdRequest } from "./types"
+import { UssdCallback, UssdRequest } from "./types"
 
 dotenv.config()
 
@@ -11,14 +12,15 @@ const app = express()
 app.use(parser.json())
 app.use(parser.urlencoded({ extended: false }))
 
-app.all('/', (req, res) => {
+app.all("/", (req, res) => {
 	res.sendStatus(200)
 })
 
-app.all('/webhook', (req: Request<{}, string, UssdRequest>, res: Response<string>) => {
-	// Read the variables sent via POST from our API
-	let response = '';
+app.all("/webhook", async (req: Request<{}, string, UssdRequest>, res: Response<string>) => {
+	// We are returning a response anyway
+	let response: string = "";
 	try {
+		// Read the variables sent via POST from our API
 		let {
 			sessionId,
 			serviceCode,
@@ -27,32 +29,25 @@ app.all('/webhook', (req: Request<{}, string, UssdRequest>, res: Response<string
 		} = req.body;
 
 		// sanitize input
+		sessionId = String(sessionId).trim()
+		serviceCode = String(serviceCode).trim()
+		phoneNumber = String(phoneNumber).trim()
 		text = String(text).trim()
 
-		if (text.match("*")) {
-			// multi session ussd
+		if (text.indexOf("*") !== -1) {
+			// long multi session ussd
+			response = "END USSD SERVICE IS UNDER MAINTAINANCE, PLEASE TRY LATER"
 		} else {
-
-		}
-
-		if (text == '') {
-			// This is the first request. Note how we start the response with CON
-			response = `CON What would you like to check
-        1. My account
-        2. My phone number`;
-		} else if (text == '1') {
-			// Business logic for first level response
-			response = `CON Choose account information you want to view
-        1. Account number`;
-		} else if (text == '2') {
-			// Business logic for first level response
-			// This is a terminal request. Note how we start the response with END
-			response = `END Your phone number is ${phoneNumber}`;
-		} else if (text == '1*1') {
-			// This is a second level response where the user selected 1 in the first instance
-			const accountNumber = 'ACC100101';
-			// This is a terminal request. Note how we start the response with END
-			response = `END Your account number is ${accountNumber}`;
+			const pubSub = new PubSub()
+			await pubSub.topic("rnd-service").publishMessage({
+				json: {
+					sessionId,
+					serviceCode,
+					phoneNumber,
+					text
+				}
+			})
+			response = "You line has been credited with 1GB SME Data successfully. Dial *323*4# to check balance."
 		}
 	} catch (error: Error | unknown) {
 		response = `END ${(error as Error).message}`
@@ -60,49 +55,37 @@ app.all('/webhook', (req: Request<{}, string, UssdRequest>, res: Response<string
 	if (!response || response.length < 5)
 		response = "USSD Working Perfectly In Development"
 	// Send the response back to the API
-	res.set('Content-Type: text/plain');
+	res.set("Content-Type: text/plain");
 	res.send(response);
 })
 
-app.all('/callback', (req, res) => {
-	// Read the variables sent via POST from our API
-	let response = '';
+app.all("/callback", async (req: Request<{}, string, UssdCallback>, res) => {
 	try {
-		const {
+		// Read the variables sent via POST from our API
+		let {
 			sessionId,
 			serviceCode,
 			phoneNumber,
-			text,
+			input,
 		} = req.body;
-		if (text == '') {
-			// This is the first request. Note how we start the response with CON
-			response = `CON What would you like to check
-        1. My account
-        2. My phone number`;
-		} else if (text == '1') {
-			// Business logic for first level response
-			response = `CON Choose account information you want to view
-        1. Account number`;
-		} else if (text == '2') {
-			// Business logic for first level response
-			// This is a terminal request. Note how we start the response with END
-			response = `END Your phone number is ${phoneNumber}`;
-		} else if (text == '1*1') {
-			// This is a second level response where the user selected 1 in the first instance
-			const accountNumber = 'ACC100101';
-			// This is a terminal request. Note how we start the response with END
-			response = `END Your account number is ${accountNumber}`;
+
+		// sanitize the inputs
+		sessionId = String(sessionId).trim()
+		serviceCode = String(serviceCode).trim()
+		phoneNumber = String(phoneNumber).trim()
+		input = String(input).trim()
+
+		if (input.indexOf("*") !== -1) {
+			// long multi session ussd
+		} else {
+			// do something else
 		}
 
-		console.log(sessionId, serviceCode)
+		// Send the response back to the API
+		res.set("Content-Type: text/plain");
+		res.sendStatus(200)
 	} catch (error: Error | unknown) {
-		response = `END ${(error as Error).message}`
 	}
-	if (!response || response.length < 5)
-		response = "USSD Working Perfectly In Development"
-	// Send the response back to the API
-	res.set('Content-Type: text/plain');
-	res.send(response);
 })
 
 process.on("SIGINT", () => {
