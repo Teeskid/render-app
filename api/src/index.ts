@@ -3,10 +3,11 @@ import path from "path"
 
 dotenv.populate(process.env as DotenvPopulateInput, { GOOGLE_APPLICATION_CREDENTIALS: path.resolve('../techify-ng-073c85f2027d.json') })
 
-import { applicationDefault, initializeApp } from "firebase-admin/app"
+import { credential } from "firebase-admin"
+import { initializeApp } from "firebase-admin/app"
 
 initializeApp({
-	credential: applicationDefault(),
+	credential: credential.cert(process.env.GOOGLE_APPLICATION_CREDENTIALS as string),
 	projectId: "techify-ng"
 })
 

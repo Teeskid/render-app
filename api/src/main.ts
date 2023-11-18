@@ -4,8 +4,6 @@ import express, { Request, Response } from "express"
 import { pid } from "process"
 import { UssdCallback, UssdRequest } from "./types"
 
-const pubSubClient = new PubSub()
-
 const port = process.env.PORT || 8888
 const app = express()
 app.use(parser.json())
@@ -26,6 +24,8 @@ app.all("/webhook", async (req: Request<{}, string, UssdRequest>, res: Response<
             phoneNumber,
             text,
         } = req.body;
+
+        const pubSubClient = new PubSub()
 
         // sanitize input
         sessionId = String(sessionId).trim()
