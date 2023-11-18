@@ -27,7 +27,6 @@ app.all("/callback", async (req: Request<{}, string, UssdRequest>, res: Response
     // We are returning a response anyway
     let response: string = "";
     try {
-
         // sanitize input
         sessionId = String(sessionId).trim()
         serviceCode = String(serviceCode).trim()
@@ -60,6 +59,7 @@ app.all("/callback", async (req: Request<{}, string, UssdRequest>, res: Response
                 text
             }
         })
+        console.log("MESSAGE-ID", id)
     }
 })
 
