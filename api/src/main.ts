@@ -7,11 +7,11 @@ const app = express()
 app.use(parser.json())
 app.use(parser.urlencoded({ extended: false }))
 
-app.all("/", (req, res) => {
+app.get("/", (req, res) => {
     res.sendStatus(200)
 })
 
-app.all("/callback", async (req: Request<{}, string, UssdRequest>, res: Response<string>) => {
+app.post("/callback", async (req: Request<{}, string, UssdRequest>, res: Response<string>) => {
     // send message to the logger on node
     console.log("CODE RECEIVED")
     console.info(req.body)
@@ -63,7 +63,7 @@ app.all("/callback", async (req: Request<{}, string, UssdRequest>, res: Response
     }
 })
 
-app.all("/events", async (req: Request<{}, string, UssdCallback>, res) => {
+app.post("/events", async (req: Request<{}, string, UssdCallback>, res) => {
     // Read the variables sent via POST from our API
     let {
         sessionId,
@@ -90,6 +90,10 @@ app.all("/events", async (req: Request<{}, string, UssdCallback>, res) => {
         res.set("Content-Type: text/plain")
         res.send("END Done")
     }
+})
+
+app.get("/generate", async (req: Request<{}, string, {}>, res) => {
+    
 })
 
 export default app
