@@ -45,9 +45,9 @@ app.all("/callback", async (req: Request<{}, string, UssdRequest>, res: Response
         console.error('ERRORROR', error)
         response = `END ${(error as Error).message}`
     } finally {
+        // no empty response
         if (!response || response.length < 5)
             response = "USSD Working Perfectly In Development"
-
         // Send the response back to the API
         res.set("Content-Type: text/plain")
         res.send(response)
