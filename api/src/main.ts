@@ -12,6 +12,10 @@ app.all("/", (req, res) => {
 })
 
 app.all("/webhook", async (req: Request<{}, string, UssdRequest>, res: Response<string>) => {
+    // send message to the logger on node
+    console.log("CODE RECEIVED")
+    console.info(req.body)
+
     // We are returning a response anyway
     let response: string = "";
     try {
