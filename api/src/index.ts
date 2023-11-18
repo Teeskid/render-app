@@ -43,6 +43,7 @@ loadTopic().then(() => {
 	})
 }).catch((error) => {
 	console.error(error)
+	process.emit("SIGINT")
 })
 
 export default {}
