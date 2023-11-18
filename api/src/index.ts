@@ -2,12 +2,28 @@ import { PubSub } from "@google-cloud/pubsub"
 import parser from "body-parser"
 import dotenv from "dotenv"
 import express, { Request, Response } from "express"
+import { initializeApp } from "firebase-admin/app"
 import { pid } from "process"
 import { UssdCallback, UssdRequest } from "./types"
+import { readFileSync } from "fs"
+import path from "path"
 
 dotenv.config()
 
-console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+// initializeApp({
+// 	credential
+// })
+
+const credentials = JSON.parse(
+	readFileSync(
+		path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS as string)
+	).toString("utf-8")
+)
+const pubSubClient = new PubSub({
+	credentials
+})
+
+// console.log(pubSubClient)
 
 const port = process.env.PORT || 8080
 const app = express()
@@ -40,8 +56,7 @@ app.all("/webhook", async (req: Request<{}, string, UssdRequest>, res: Response<
 			// long multi session ussd
 			response = "END USSD SERVICE IS UNDER MAINTAINANCE, PLEASE TRY LATER"
 		} else {
-			const pubSub = new PubSub()
-			await pubSub.topic("rnd-service").publishMessage({
+			await pubSubClient.topic("rnd-service").publishMessage({
 				json: {
 					sessionId,
 					serviceCode,
