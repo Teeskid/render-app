@@ -1,10 +1,8 @@
-import { PubSub } from "@google-cloud/pubsub"
 import parser from "body-parser"
 import express, { Request, Response } from "express"
-import { pid } from "process"
 import { UssdCallback, UssdRequest } from "./types"
+import { getTopic } from "./utils/client"
 
-const port = process.env.PORT || 8888
 const app = express()
 app.use(parser.json())
 app.use(parser.urlencoded({ extended: false }))
@@ -25,8 +23,6 @@ app.all("/webhook", async (req: Request<{}, string, UssdRequest>, res: Response<
             text,
         } = req.body;
 
-        const pubSubClient = new PubSub()
-
         // sanitize input
         sessionId = String(sessionId).trim()
         serviceCode = String(serviceCode).trim()
@@ -37,7 +33,7 @@ app.all("/webhook", async (req: Request<{}, string, UssdRequest>, res: Response<
             // long multi session ussd
             response = "END USSD SERVICE IS UNDER MAINTAINANCE, PLEASE TRY LATER"
         } else {
-            await pubSubClient.topic("rnd-service").publishMessage({
+            getTopic().publishMessage({
                 json: {
                     sessionId,
                     serviceCode,
@@ -48,6 +44,7 @@ app.all("/webhook", async (req: Request<{}, string, UssdRequest>, res: Response<
             response = "You line has been credited with 1GB SME Data successfully. Dial *323*4# to check balance."
         }
     } catch (error: Error | unknown) {
+        console.error('ERRORROR', error)
         response = `END ${(error as Error).message}`
     }
     if (!response || response.length < 5)
@@ -86,12 +83,4 @@ app.all("/callback", async (req: Request<{}, string, UssdCallback>, res) => {
     }
 })
 
-process.on("SIGINT", () => {
-    process.kill(pid)
-})
-
-app.listen(port, () => {
-    console.log(`SERVING API ON PORT ${port}`)
-})
-
-export default {}
+export default app
