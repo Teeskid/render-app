@@ -7,6 +7,8 @@ import { UssdCallback, UssdRequest } from "./types"
 
 dotenv.config()
 
+console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+
 const port = process.env.PORT || 8080
 const app = express()
 app.use(parser.json())
