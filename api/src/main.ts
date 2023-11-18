@@ -4,6 +4,9 @@ import { UssdCallback, UssdRequest } from "./types"
 import { getTopic } from "./utils/client"
 
 const app = express()
+
+app.set("view engine", "esm")
+
 app.use(parser.json())
 app.use(parser.urlencoded({ extended: false }))
 
@@ -93,7 +96,7 @@ app.post("/events", async (req: Request<{}, string, UssdCallback>, res) => {
 })
 
 app.get("/generate", async (req: Request<{}, string, {}>, res) => {
-    
+
 })
 
 export default app

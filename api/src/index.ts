@@ -34,13 +34,15 @@ process.on("SIGINT", () => {
 	process.kill(pid)
 })
 
-console.log("LOADIN CLOUD PUBSUB TOPIC...")
+console.log("LOADING CLOUD PUBSUB TOPIC...")
 loadTopic().then(() => {
 	console.log("CLOUD PUBSUB TOPIC LOADED")
 	console.log("STARTING NODE SERVER...")
 	app.listen(SERVER_PORT, () => {
 		console.log(`SERVING API ON PORT ${SERVER_PORT}`)
 	})
+}).catch((error) => {
+	console.error(error)
 })
 
 export default {}
